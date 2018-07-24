@@ -73,18 +73,18 @@ function newCharacter(image, x, y)
     local character = {}
 
     character.anims = {
-        down = newAnimation(image,0,0,16,16,4),
-        right = newAnimation(image,0,1,16,16,4),
-        up = newAnimation(image,0,2,16,16,4),
-        left = newAnimation(image,0,3,16,16,4)
+        down = newAnimation(image, 0,0,16,32,4),
+        right = newAnimation(image,0,1,16,32,4),
+        up = newAnimation(image,   0,2,16,32,4),
+        left = newAnimation(image, 0,3,16,32,4)
     }
 
     character.current_anim = character.anims.down
+
     character.x = x 
     character.y = y
     
     function character:update(dt)
-        print('update character',self,dt)
 		for key, anim in pairs(self.anims) do
             if love.keyboard.isDown(key) then
                 print(key,"is down")
@@ -100,10 +100,6 @@ function newCharacter(image, x, y)
 
 	-- Draw callback for Custom Layer
 	function character:draw()
-        print('draw character',self)
-		for key, anim in pairs(self) do
-            print(key,anim)
-        end
         self.current_anim:draw(x,y)
 	end
  
@@ -117,18 +113,16 @@ function newAnimation(image, x_start, y_start, width, height, frames, duration)
 
     y = y_start*height
     for x = x_start*width, (x_start + frames)*width, width do
-        print("inserting frame at ",x,y,width,height)
         table.insert(animation.quads, love.graphics.newQuad(x, y, width, height, image:getDimensions()))
     end
- 
+     
     animation.time = 0.0
     animation.duration = duration or 1
 
 
 	-- Draw callback for Custom Layer
 	function animation:draw(x,y)
-        local index = math.floor(self.time/self.duration * #self.quads)
-        print("index=",index)
+        local index = math.floor(self.time/self.duration * #self.quads) + 1
 		love.graphics.draw(self.spriteSheet,self.quads[index], x, y)
 	end
  
