@@ -24,12 +24,8 @@ function love.draw()
     local tx = math.floor(player.x - screen_width / 2)
     local ty = math.floor(player.y - screen_height / 2)
 
-    -- Transform world
-    love.graphics.scale(scale)
-    love.graphics.translate(-tx, -ty)
-
     -- Draw world
-    map:draw()
+    map:draw(-tx,-ty,scale,scale)
 
 end
 
