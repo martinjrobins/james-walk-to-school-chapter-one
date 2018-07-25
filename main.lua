@@ -8,7 +8,7 @@ function love.load()
 end
 
 function love.update(dt)
-	map:update(dt)
+    map:update(dt)
 end
 
 function love.draw()
@@ -18,7 +18,7 @@ function love.draw()
     local screen_height = love.graphics.getHeight() / scale
 
     -- Translate world so that player is always centred
-	local spriteLayer = map.layers["Sprite Layer"]
+    local spriteLayer = map.layers["Sprite Layer"]
     local player = spriteLayer.sprites.player
 
     local tx = math.floor(player.x - screen_width / 2)
@@ -44,28 +44,39 @@ function newCharacter(image, x, y)
         still = newAnimation(image, 0,0,16,32,1)
     }
 
+    character.movement = {
+        walk_down =  {0,1},
+        walk_right=  {1,0},
+        walk_up=  {0,-1},
+        walk_left=  {-1,0},
+        still=  {0,0},
+    }
 
     character.current_anim = character.anims.still
 
-    character.x = x 
+    character.x = x
     character.y = y
     character.vx = 0
     character.vy = 0
+    character.speed = 20
 
     function character:startAnimation(anim)
-        self.current_anim = self.anims[anim] 
+        self.current_anim = self.anims[anim]
+        self.vx = self.movement[anim][1]*self.speed
+        self.vy = self.movement[anim][2]*self.speed
         self.current_anim.time = 0
-	end
-    
+    end
+
     function character:update(dt)
         self.current_anim:update(dt)
-        print(self.current_anim)
-	end
+        self.x = self.x + dt*self.vx
+        self.y = self.y + dt*self.vy
+    end
 
-	function character:draw()
-        self.current_anim:draw(x,y)
-	end
- 
+    function character:draw()
+        self.current_anim:draw(self.x,self.y)
+    end
+
     return character
 end
 
@@ -76,33 +87,32 @@ function newAnimation(image, x_start, y_start, width, height, frames, duration)
 
     y = y_start*height
     for x = x_start*width, (x_start + frames - 1)*width, width do
-        print("inserting frame at ",x)
         table.insert(animation.quads, love.graphics.newQuad(x, y, width, height, image:getDimensions()))
     end
-     
+
     animation.time = 0.0
     animation.duration = duration or 1
 
     -- Draw callback for Custom Layer
-	function animation:update(dt)
+    function animation:update(dt)
         self.time = self.time + dt
         if self.time >= self.duration then
-           self.time = self.time  - self.duration
+            self.time = self.time  - self.duration
         end
-	end
+    end
 
-	-- Draw callback for Custom Layer
-	function animation:draw(x,y)
+    -- Draw callback for Custom Layer
+    function animation:draw(x,y)
         local index = math.floor(self.time / self.duration * #self.quads) + 1
-		love.graphics.draw(self.spriteSheet,self.quads[index], x, y-height/2)
-	end
- 
+        love.graphics.draw(self.spriteSheet,self.quads[index], x, y-height/2)
+    end
+
     return animation
 end
 
 function createMap()
-	-- Load a map exported to Lua from Tiled
-	map = sti("gfx/level_1.lua")
+    -- Load a map exported to Lua from Tiled
+    map = sti("gfx/level_1.lua")
 end
 
 
@@ -118,27 +128,27 @@ function createSpriteLayer()
     end
 
     -- Create a Custom Layer
-	local spriteLayer = map:addCustomLayer("Sprite Layer", 5)
+    local spriteLayer = map:addCustomLayer("Sprite Layer", 5)
 
-	-- Add data to Custom Layer
-	spriteLayer.sprites = {
+    -- Add data to Custom Layer
+    spriteLayer.sprites = {
         player = newCharacter(love.graphics.newImage("gfx/character.png"),player.x,player.y)
-	}
+    }
 
 
-	-- Update callback for Custom Layer
-	function spriteLayer:update(dt)
-		for _, sprite in pairs(self.sprites) do
-	        sprite:update(dt)
-		end
-	end
+    -- Update callback for Custom Layer
+    function spriteLayer:update(dt)
+        for _, sprite in pairs(self.sprites) do
+            sprite:update(dt)
+        end
+    end
 
-	-- Draw callback for Custom Layer
-	function spriteLayer:draw()
-		for _, sprite in pairs(self.sprites) do
+    -- Draw callback for Custom Layer
+    function spriteLayer:draw()
+        for _, sprite in pairs(self.sprites) do
             sprite:draw()
-		end
-	end
+        end
+    end
 
     map:removeLayer("spawn")
 
@@ -147,11 +157,11 @@ end
 
 
 function createGameStates()
-   local spriteLayer = map.layers["Sprite Layer"]
-   local player = spriteLayer.sprites.player
-   local gameStates = {}
-   local state
-    
+    local spriteLayer = map.layers["Sprite Layer"]
+    local player = spriteLayer.sprites.player
+    local gameStates = {}
+    local state
+
     gameStates.gameLoop = {
         bindings = {
             up = function() player:startAnimation("walk_up") end,
