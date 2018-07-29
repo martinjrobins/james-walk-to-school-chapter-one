@@ -1,3 +1,6 @@
 [submodule "third-party/Simple-Tiled-Implementation"]
 	path = third-party/Simple-Tiled-Implementation
 	url = https://github.com/karai17/Simple-Tiled-Implementation
+[submodule "third-party/bump.lua"]
+	path = third-party/bump.lua
+	url = https://github.com/kikito/bump.lua

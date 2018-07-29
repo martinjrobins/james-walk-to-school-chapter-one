@@ -1,5 +1,10 @@
+--package.path = package.path .. ";third-party/Simple-Tiled-Implementation/?/utils.lua"
+package.path = package.path .. ";third-party/Simple-Tiled-Implementation/?.lua"
+package.path = package.path .. ";third-party/Simple-Tiled-Implementation/?/init.lua"
+package.path = package.path .. ";third-party/?.lua/?.lua"
 
-local sti = require "third-party.Simple-Tiled-Implementation.sti"
+local bump = require "bump"
+local sti = require "sti"
 
 function love.load()
     createMap()
@@ -65,13 +70,16 @@ function newCharacter(image, x, y)
 
     function character:update(dt)
         self.current_anim:update(dt)
-        self.x = self.x + dt*self.vx
-        self.y = self.y + dt*self.vy
+        local actualX, actualY, cols, len = world:move(player, self.x + dt*self.vx, self.y + dt*self.vy)
+        self.x = actualX
+        self.y = actualY
     end
 
     function character:draw()
         self.current_anim:draw(self.x,self.y)
     end
+
+    world:add(character,x,y,16,16)
 
     return character
 end
@@ -108,7 +116,9 @@ end
 
 function createMap()
     -- Load a map exported to Lua from Tiled
-    map = sti("gfx/level_1.lua")
+    map = sti("gfx/level_1.lua", {"bump"})
+    world = bump.newWorld()
+    map:bump_init(world)
 end
 
 
@@ -130,6 +140,7 @@ function createSpriteLayer()
     spriteLayer.sprites = {
         player = newCharacter(love.graphics.newImage("gfx/character.png"),player.x,player.y)
     }
+
 
 
     -- Update callback for Custom Layer
